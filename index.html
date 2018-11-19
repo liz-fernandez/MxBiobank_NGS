@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>TIB2017: Análisis transcriptómicos</title>
+    <title>TIB2017: NGS – from fastq to variant annotation</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -26,73 +26,23 @@
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
-                    <h1 class="title">Análisis transcriptómicos</h1>
-          <p>Estamos realizando un estudio transcriptómico para entender la expresion de genes en la levadura (<em>Saccharomyces pombe</em>) cuando se expresa una mutante de un proteína que cambia de especificidad.</p>
-<p>Hemos logrado aislar los transcritos del cromosoma I en dos condiciones: mutante y wild type (WT).</p>
-<p>Queremos realizar un análisis completo de la expresión diferencial de estos transcritos. Durante esta practica realizaremos el análisis desde identificar la calidad de las secuencias hasta medir si los cambios en expresión son significativos usando métodos estadísticos.</p>
-<p>Diagrama de flujo de trabajo para análisis de datos de secuenciación masiva</p>
-<p>Esta mañana recibimos un correo de nuestro colaborador:</p>
-<blockquote>
-<p>Dear collaborator,</p>
-<p>I have great news. All samples passed the QC and were successfully sequenced in our Hi-Seq 2000. You can download the data from the URL below. The md5sum files are also in the tar-ball.</p>
-<p><a href="https://drive.google.com/open?id=0B9ZVSRlHL8cIbm5EUXczdzM4a2M" class="uri">https://drive.google.com/open?id=0B9ZVSRlHL8cIbm5EUXczdzM4a2M</a></p>
-<p>Can’t wait to see if there are indeed major changes to the transcriptome in the mutant!</p>
-<p>Happy data wranggling!</p>
-<p>Professor X</p>
-</blockquote>
-<section class="prereq panel panel-warning">
-<div class="panel-heading">
-<h2 id="conocimientos-previos"><span class="glyphicon glyphicon-education"></span>Conocimientos previos</h2>
-</div>
-<div class="panel-body">
-<p>Se espera que los estudiantes tengan alguna experiencia con la terminal, así con el uso del lenguaje de programación R.</p>
-</div>
-</section>
-<h3 id="temas">Temas</h3>
+                    <h1 class="title">NGS – from fastq to variant annotation</h1>
+          <h3 id="themes">Themes</h3>
 <ol style="list-style-type: decimal">
-<li>Introducción a la transcriptómica y técnicas de secuenciación masiva.
+<li>Introduction to transcriptomics and massive sequencing techniques.
 <ul>
-<li><a href="SLIDES/PBI_18_Clase_1.pdf">Presentación</a></li>
+<li><a href="SLIDES/Mx_Biobank_NGS_Techniques.pdf">Lecture</a></li>
 </ul></li>
-<li>Control de calidad de datos de secuenciación masiva.
+<li>Quality control of massive sequencing data.
 <ul>
-<li><a href="SLIDES/PBI_18_Clase_2.pdf">Presentación</a></li>
-<li><a href="01-quality.html">Práctica</a></li>
+<li><a href="01-quality.html">Practical</a></li>
 </ul></li>
-<li>Ensamble de transcriptomas <em>de novo</em>.
-<ul>
-<li><a href="SLIDES/PBI_18_Clase_3.pdf">Presentación</a></li>
-<li><a href="02-assembly_denovo.html">Práctica</a></li>
-</ul></li>
-<li>Alineamiento de lecturas y transcritos.
+<li>Read alignment
 <ul>
 <li><a href="SLIDES/PBI_18_Clase_4.pdf">Presentación</a></li>
-<li><a href="03-mapping.html">Práctica</a></li>
-</ul></li>
-<li>Análisis de expresión diferencial.
-<ul>
-<li><a href="SLIDES/PBI_18_Clase_7.pdf">Presentación</a></li>
-<li><a href="04-expression.html">Práctica</a></li>
-</ul></li>
-<li>Ensamble de transcriptomas guiado.
-<ul>
-<li><a href="SLIDES/PBI_18_Clase_5.pdf">Presentación</a></li>
-<li><a href="05-assembly_guided.html">Práctica</a></li>
+<li><a href="02-mapping.html">Practical</a></li>
 </ul></li>
 </ol>
-<!---
-7. Anotación
-    * [Presentación](SLIDES/PBI_17_Clase_8.pdf)
-    * [Práctica](07-annotation.html)
-    
-    
-
-![Diagrama de ensamble de transcriptomas](SLIDES/Transcriptomics_Workflow.png)
-
-Prácticas basadas en el curso [Trinity RNA-Seq Analysis Workshop](https://github.com/trinityrnaseq/RNASeq_Trinity_Tuxedo_Workshop/wiki).
-
-
---->
         </div>
       </div>
       </article>

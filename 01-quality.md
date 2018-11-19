@@ -1,32 +1,32 @@
 ---
 layout: page
-title: Análisis transcriptómicos
-subtitle: Control de calidad de datos de secuenciación masiva
+title: NGS – from fastq to variant annotation
+subtitle: Quality control of NGS data
 minutes: 5
 ---
 
-> ## Objetivos de aprendizaje {.objectives}
+> ## Learning objectives {.objectives}
 >
 > *   Entender el formato FastQ.
 > *   Entender el concepto de calidad de una secuencia. 
 > *   Aprender a utilizar software para medir y mejorar la calidad de datos de secuenciación masiva.
 
-## Descargando los datos
+## Downloading the data
 
-Lo primero que hacemos al recibir nuestros datos es descargarlos. Generalmente están en un formato comprimido llamado tar. 
-Podemos descomprimir los datos usando ese mismo comando:
+The first thing we do when receiving our data is to download them. They are usually in a compressed format called tar. We can decompress the data using that same command:
 
 ~~~ {.bash}
 $ tar -xvf FastQC_Short.tar.gz
 ~~~
 
-Este comando descomprime un directorio llamado `FastQC_Short`. Entramos en ese directorio:
+This command decompresses a directory called `FastQC_Short`.
+We enter that directory:
 
 ~~~ {.bash}
 $ cd FastQC_Short
 ~~~
  
-Revisamos su contenido:
+Revise its content:
 
 ~~~ {.bash}
 $ ls
@@ -54,16 +54,17 @@ Partial_SRR2467151.fastq
 > ~~~ {.output}
 > <nombre de la muestra>_<secuencia identificadora (barcode)>_L<línea (3 dígitos)>_R<número de lectura (read)>_<número del set (3 dígitos)>.fastq.gz
 > ~~~
-> Ejemplo: NA10831_ATCACG_L002_R1_001.fastq.gz
+> Example: NA10831_ATCACG_L002_R1_001.fastq.gz
 >
-> Es ideal respetar estos nombres para evitar perder información.
+> It is ideal to respect these names to avoid losing information.
  
-Revisemos uno de los archivos usando el comando head. Normalmente nos muestra las primeras
-10 líneas de una archivo pero con la bandera `-n` nos mostrará las primeras 12:
+Let's review one of the files using the head command. It usually shows us the first
+10 lines of a file but with the `-n` flag will show us the first 12:
 
 ~~~ {.bash}
 $ head -n 12 Partial_SRR2467141.fastq 
 ~~~
+
 ~~~ {.output}
 @SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
 NTTATTTTTTTCGTTCTTCTTGAAGAAGACGTTACCTACGGCGTATTTGCCCATCTCAGGTATGTCTAGATCAAGATCTAACTTGAATTCTCTTTTCATAA
@@ -79,28 +80,27 @@ CATCTTTTCTTTAGGCACATCATCCTGATAAGTGTACTTACCAGGATATATACCATCGGTATTGATGTTATCGGCATCAC
 @CCFFFFFHHHHHJJJIIJJIJJJJJJEIJJJIIJJJIJIJJIJJIIIJJJIIIHIIIJDHIJJIGJJIJJJJJIHHHFFFFFEEEEEEDDEDDDDDDDDD
 ~~~
 
-Este archivo se encuentra en formato `fastq`. Este es el formato que general la mayoría de 
-los secuenciadores actuales. Este formato es una modificación del formato de secuencias 
-[Fasta](https://en.wikipedia.org/wiki/FASTA_format). Se pueden reconocer porque terminan
-con la extensión `.fq` o `.fastq`. 
+This file is in `fastq` format. This is the format that most modern sequencing platforms generate. This format is a modification of the sequence format
+[Fasta](https://en.wikipedia.org/wiki/FASTA_format). You can recognize them because they end
+with the extension `.fq` or `.fastq`.
 
-Los archivos FastQ son archivos planos de texto ASCII que contienen tanto las secuencias
-detectadas por el secuenciador así como información acerca de la calidad de cada uno 
-de estos nucleótidos. 
+FastQ files are plain ASCII text files that contain both the sequences
+detected by the sequencer as well as information about the quality of each one
+of the sequenced nucleotides.
 
-> ## ¡No cambies archivos fastq! {.callout}
+> ## Do not change fastq files! {.callout}
 >
-> Los archivos fastq que recibas después de un experimento de secuenciación serán
-> los que te soliciten cuando quieras publicar un artículo. Idealmente, realiza un
-> para de copias en distintos dispositivos en cuanto los recibas y *no los modifiques manualmente*.
+> The fastq files that you receive after a sequencing experiment will be
+> requested when you want to publish an article. Ideally, make a
+> couple of copies on different devices as soon as you receive them and *do not modify them manually*.
 > 
-> También es recomendable que, de tener la información a la mano, crees un pequeño
-> archivo README (de texto plano) que esté en el mismo directorio que tus archivos fastq 
-> y describa como se realizó el experimento, cuantas réplicas hay de cada condición, que 
-> índices y controles se utilizaron, etc. Esto te ayudará enormemente al tratar de 
-> interpretar tus resultados.
+> It is also recommended that, if you have the information at hand, you create a small
+> README file (plain text) that is in the same directory as your fastq files
+> and describe how the experiment was performed, how many replicas there are of each condition, which
+> indexes and controls were used, etc. This will help you greatly when trying to
+> interpret your results.
 
-Tomamos una sola secuencia como ejemplo:
+We will take a single sequence as an example:
 
 ~~~ {.output}
 @SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
@@ -109,7 +109,7 @@ NTTATTTTTTTCGTTCTTCTTGAAGAAGACGTTACCTACGGCGTATTTGCCCATCTCAGGTATGTCTAGATCAAGATCTA
 #1:=BDDDHDHB?<?CFGGGC9@FF@GGGG>EEEDGDHGFHGE;AEFH>AC@D;@B>C>CCC@C>>DDCC3:>AA5>CC>>CCD>@CCDCDCCCCC@C@>C
 ~~~
 
-Y vemos que cada secuencia esta representada por 4 líneas. 
+We see that each sequence is represented by 4 lines.
 
 1. **Nombre de la secuencia** - Esta línea comienza con el símbolo `@`, seguido por el nombre de la lectura. 
 2. La **secuencia** nucleotídica. 
@@ -119,19 +119,19 @@ uno de estos caracteres corresponde a un nucleótido de la secuencia y represent
 nivel de confianza que se tiene en esa base. Niveles altos indican que la base se ha reportado correctamente mientras que niveles bajos sugieren 
 que hay incertidumbre acerca de la secuencia real en esta posición. 
 
-El nombre de la secuencia también contiene información importante. En 
-este caso, los datos de Illumina proporcionan la siguiente información:
+The name of the sequence also contains important information. In
+In this case, the Illumina data provide the following information:
 
 ~~~ {.output}
 @<instrumento>:<corrida>:<identificador de celda de flujo>:<línea>:<cuadro>:<x-coord>:<y-coord> <lectura>:<si fue filtrada>:<número de control>:<índice de la secuencia> length=<tamaño de la secuencia>
 ~~~
 
-Al nivel de calidad representado en la cuarta línea se le denomina Phred score. En su
-formato original un Phred score es simplemente el logaritmo de las probabilidades de 
+The level of quality represented in the fourth line is called Phred score. In its
+original format a Phred score is simply the logarithm of the probabilities of
 error:
 
 ~~~ {.output}
-Phred score = - 10 * log10(probabilidad de error)
+Phred score = - 10 * log10(error probability)
 ~~~
 
 | Puntaje de calidad (quality score) | Probabilidad de error |
@@ -141,54 +141,54 @@ Phred score = - 10 * log10(probabilidad de error)
 | Q20 0.01 | (1 en 100) |
 | Q10 0.1 | (1 en 10) |
 
-Espera, si los puntajes de Phred son números, ¿por qué los puntajes de calidad mostrados
-en la línea cuatro son una mezcla de símbolos alfanuméricos?
+Wait, if the Phred scores are numbers, why do the quality scores shown
+in line four are a mixture of alphanumeric symbols?
 
 ~~~ {.output}
 #1:=BDDDHDHB?<?CFGGGC9@FF@GGGG>EEEDGDHGFHGE;AEFH>AC@D;@B>C>CCC@C>>DDCC3:>AA5>CC>>CCD>@CCDCDCCCCC@C@>C
 ~~~
 
-Esto es debido a que estos puntajes están codificados en ASCII (American Standard Code for Informational Interchange). 
-En breve, ASCII es un sistema de codificación que equipara un número a un caracter 
-alfanumérico. Por ejemplo, el carácter 'A' se representa por el número 65 en la tabla 
-de código ASCII, mientras que '%' se representa por el número 37. Este sistema nos permite
-representar así un total de 256 caracteres distintos. 
+This is because these scores are encoded in ASCII (American Standard Code for Informational Interchange).
+In short, ASCII is a coding system that equates a number to a character
+alphanumeric. For example, the character 'A' is represented by the number 65 in the table
+ASCII code, while '%' is represented by the number 37. This system allows us to
+represent a total of 256 different characters.
 
-¿Por qué usar ASCII? Dada la enorme cantidad de datos producidos durante secuenciación
-masiva, se trata de reducir los datos al máximo. El sistema ASCII nos permite representar 
-números de dos dígitos en un solo bit (8 bites), lo cual reduce el espacio que ocupan
-estos archivos. Si te interesa el tema puedes leer más acerca de codificación binaria. 
+Why use ASCII? Given the huge amount of data produced during massive parallel sequencing, it's all about reducing the data to the maximum. The ASCII system allows us to represent
+two-digit numbers in a single bit (8 bits), which reduces the space they occupy
+these files. If you are interested in the subject, you can read more about binary coding.
 
-Finalmente, desde que se inventó este sistema de codificación de calidad, el cuál ya se
-utilizaba con la secuenciación tipo Sanger, distintas compañías han "deslizado" las escalas
-de conversión de ASCII porque lo que es importante verificar con la compañía o laboratorio
-en que versión de esta escala se han codificado para usar la conversión correcta. Algunas
-de las herramientas de control de calidad que utilizaremos infieren el tipo de codificación
-utilizado a partir de los datos.
+Finally, since this quality coding system was invented, which is already
+used with Sanger-type sequencing, different companies have "slipped" the scales
+of ASCII conversion because what is important to verify with the company or laboratory
+in which version of this scale have been coded to use the correct conversion. Some
+of the quality control tools that we will use infer the type of coding
+used directly from the data provided.
 
-## Verificando la calidad de las secuencias
+## Verifying the quality of the sequences
 
-Verificaremos la calidad de las secuencias usando el programa [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/). 
-Este es uno de los programa más utilizados para este tipo de análisis, 
-ya que provee una visión global de como se estructuran los datos, así como 
-ser bastante rápido.
+We will verify the quality of the sequences using the program [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
+This is one of the most used programs for this type of analysis,
+since it provides a global vision of how the data is structured, as well as
+being pretty fast.
 
-FastQC lee una serie de archivos de secuenciación y produce un reporte de
-control de calidad para cada uno, el cual consiste de un número de módulos diferentes, 
-cada uno de los cuales nos ayuda a identificar distintos problemas en nuestros datos. 
+FastQC reads a series of sequencing files and produces a report of
+quality control for each one, which consists of a number of different modules,
+each of which helps us identify different problems in our data.
 
-Analicemos nuestro primer archivo de secuenciación, 
-primero creamos un directorio para almacenar nuestros resultados:
+Let's analyze our first sequencing file,
+first we created a directory to store our results:
 
 ~~~ {.bash}
 $ mkdir QUAL
 ~~~
 
-Y realizamos nuestro análisis de calidad usando FastQC:
+And we perform our quality analysis using FastQC:
 
 ~~~ {.bash}
 $ fastqc -O ./QUAL/ Partial_SRR2467141.fastq 
 ~~~
+
 ~~~ {.output}
 Started analysis of Partial_SRR2467141.fastq
 Approx 20% complete for Partial_SRR2467141.fastq
@@ -198,7 +198,7 @@ Approx 80% complete for Partial_SRR2467141.fastq
 Analysis complete for Partial_SRR2467141.fastq
 ~~~ 
 
-Una vez terminado revisemos el resultado:
+Once finished, let's review the result:
 
 ~~~ {.bash}
 $ cd QUAL
@@ -209,12 +209,12 @@ Partial_SRR2467141_fastqc.html
 Partial_SRR2467141_fastqc.zip
 ~~~
 
-La manera más sencilla de explorar estos resultados es abriendo el archivo html en
-su navegador. Lo puedes hacer dando doble click en el archivo. 
+The easiest way to explore these results is by opening the html file in
+your browser. You can do it by double clicking on the file.
 
 El resultado obtenido deberá ser similar a [este](http://liz-fernandez.github.io/transcriptome_analysis/Partial_SRR2467141_fastqc.html).
 
-Esta página contiene mucha información desglosada en las siguientes secciones:
+This page contains a lot of information broken down into the following sections:
 
 1. **Basic Statistics** - Las estadística básicas del experimento.
 2. **Per base sequence quality** - Diagramas de caja mostrando la calidad de cada base.
