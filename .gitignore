@@ -9,3 +9,8 @@ CONDUCT.html
 _site
 .DS_Store
 .Rproj.user
+Alignment&VariantCalling.zip
+DEPRECATED/
+SLIDES/Mx_Biobank_NGS_Mapping.key
+SLIDES/Transcriptomics_Workflow.png
+VariantCalling/

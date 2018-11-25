@@ -19,8 +19,9 @@
   <body class="lesson">
     <div class="container card">
       <div class="banner">
-        <a href="http://bi.ira.cinvestav.mx:8282/" title="Posgrado en Biologia Integrativa">
-          <img alt="Logo PBI" src="img/posgrado_bi_logo.png" />
+        <a href="https://mxbiobankworkshop.wordpress.com/" title="Practical workshop on Large-Scale
+            Genomic Data Analyses: GWAS in structured populations">
+          <img alt="MX Biobank Logo" src="img/mxbiobank_logo_reduced.png" />
         </a>
       </div>
       <article>
@@ -254,126 +255,11 @@ PASS    Kmer Content    Partial_SRR2467141.fastq</code></pre>
 </section>
 <h2 id="limpiando-las-secuencias">Limpiando las secuencias</h2>
 <p>Existen un número de herramientas para limpiar secuencias y distintos investigadores tienen distintas preferencias. Cómo con otros problemas de secuenciación existe un desarrollo activo de programas con este fin.</p>
-<p>Nosotros utilizaremos un programa llamado <a href="http://www.usadellab.org/cms/?page=trimmomatic">Trimmomatic</a>. Este es un programa basado en Java lo que, al igual que FastQC, lo hace muy rápido. Además cuenta con modos de filtrado para lecturas en conformación individual o en pares (paired-end).</p>
-<p>El programa realiza diversas funciones, incluyendo:</p>
+<p>Examples of programs you can use in case your data is not great.</p>
 <ul>
-<li>Remoción de adaptadores</li>
-<li>Remoción de bases de baja calidad en el 5’ o 3’ de la lectura</li>
-<li>Escaneo de la secuencia a través de una ventana de 4 nucleótidos, cortando cuando la calidad promedio de la base baja de 15.</li>
-<li>Eliminar secuencias más cortas que un tamaño particular</li>
-<li>Cortar un número específico de nucleótidos en el extremo 5’ o 3’</li>
-<li>Conversión de puntajes de calidad entre distintas versiones de Phred.</li>
+<li>Trimmomatic</li>
+<li></li>
 </ul>
-<p>Las funciones específicas de acuerdo al manual son:</p>
-<ul>
-<li>ILLUMINACLIP: Cut adapter and other illumina-specific sequences from the read.</li>
-<li>SLIDINGWINDOW: Perform a sliding window trimming, cutting once the average quality within the window falls below a threshold.</li>
-<li>LEADING: Cut bases off the start of a read, if below a threshold quality</li>
-<li>TRAILING: Cut bases off the end of a read, if below a threshold quality</li>
-<li>CROP: Cut the read to a specified length</li>
-<li>HEADCROP: Cut the specified number of bases from the start of the read</li>
-<li>MINLEN: Drop the read if it is below a specified length</li>
-<li>TOPHRED33: Convert quality scores to Phred-33</li>
-<li>TOPHRED64: Convert quality scores to Phred-64</li>
-</ul>
-<p>La configuración cambia dependiendo si las secuencias son single end o paired-end.</p>
-<p>Pueden encontrar descripciones más detalladas de sus funciones en el <a href="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf">manual</a> en línea.</p>
-<p>Veamos como funciona. El software ya está instalado en el servidor.</p>
-<p>Si lo quisieras instalar en tu computadora lo harías descargando el archivo binario:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">wget</span> http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip</code></pre></div>
-<p>Regresemos a la carpeta donde están nuestro archivos fastq.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cd</span> ..</code></pre></div>
-<p>La calidad de nuestras secuencias de prueba es bastante buena, pero vimos que la calidad baja en el extremo 3’, así como la presencia desproporcionada de bases en el extremo 5’. Limpiemos nuestras secuencias usando Trimmomatic.</p>
-<p>Pediremos que corte:</p>
-<ul>
-<li>Los adaptadores Illumina TruSeq single end (SE) del extremo 3’</li>
-<li>Los primeros 10 nucleótidos del 5’</li>
-<li>Bases de mala calidad usando una ventana de 4 nucleótidos con un promedio mínimo de Phred de 15</li>
-<li>Secuencias menores a 60 nucleótidos.</li>
-</ul>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">trimmomatic</span> SE Partial_SRR2467141.fastq Trimmed_Partial_SRR2467141.fastq ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 HEADCROP:10 SLIDINGWINDOW:4:15 MINLEN:60</code></pre></div>
-<pre class="output"><code>Automatically using 1 threads
-java.io.FileNotFoundException: /home/sfernandez/CLASS_TEST/FastQC_Short/TruSeq3-SE.fa (No such file or directory)
-    at java.io.FileInputStream.open0(Native Method)
-    at java.io.FileInputStream.open(FileInputStream.java:195)
-    at java.io.FileInputStream.&lt;init&gt;(FileInputStream.java:138)
-    at org.usadellab.trimmomatic.fasta.FastaParser.parse(FastaParser.java:54)
-    at org.usadellab.trimmomatic.trim.IlluminaClippingTrimmer.loadSequences(IlluminaClippingTrimmer.java:110)
-    at org.usadellab.trimmomatic.trim.IlluminaClippingTrimmer.makeIlluminaClippingTrimmer(IlluminaClippingTrimmer.java:71)
-    at org.usadellab.trimmomatic.trim.TrimmerFactory.makeTrimmer(TrimmerFactory.java:32)
-    at org.usadellab.trimmomatic.Trimmomatic.createTrimmers(Trimmomatic.java:59)
-    at org.usadellab.trimmomatic.TrimmomaticSE.run(TrimmomaticSE.java:303)
-    at org.usadellab.trimmomatic.Trimmomatic.main(Trimmomatic.java:85)
-Quality encoding detected as phred33
-Input Reads: 5000 Surviving: 4856 (97.12%) Dropped: 144 (2.88%)
-TrimmomaticSE: Completed successfully</code></pre>
-<p>Podemos ver que hubo muy pocas secuencias que fueron descartadas pero aún así son cosas que podrían haber afectado nuestro análisis y/o ensamble. Vemos además que hay un error:</p>
-<pre class="output"><code>java.io.FileNotFoundException: /home/sfernandez/CLASS_TEST/FastQC_Short/TruSeq3-SE.fa (No such file or directory)</code></pre>
-<p>Esto se debe a que las secuencias de los adaptadores no se encuentran el mismo directorio que nuestro datos. Una manera de compensar esto es descargar los archivos necesarios (estos archivos se proveen con trimmomatic pero los descargaremos dado que estamos trabajando en el servidor)</p>
-<p>Descarguemos este archivo y ejecutemos nuevamente Trimmomatic:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">wget</span> https://raw.githubusercontent.com/timflutre/trimmomatic/master/adapters/TruSeq3-SE.fa</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">trimmomatic</span> SE Partial_SRR2467141.fastq Trimmed_Partial_SRR2467141.fastq ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 HEADCROP:10 SLIDINGWINDOW:4:15 MINLEN:60</code></pre></div>
-<pre class="output"><code>Automatically using 1 threads
-Using Long Clipping Sequence: &#39;AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA&#39;
-Using Long Clipping Sequence: &#39;AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC&#39;
-ILLUMINACLIP: Using 0 prefix pairs, 2 forward/reverse sequences, 0 forward only sequences, 0 reverse only sequences
-Quality encoding detected as phred33
-Input Reads: 5000 Surviving: 4847 (96.94%) Dropped: 153 (3.06%)
-TrimmomaticSE: Completed successfully</code></pre>
-<p>Este resultado nos muestra que el programa se ejecutó adecuadamente y eliminó secuencias que contienen los adaptadores que indicamos. Comparando con nuestros resultados previos vemos que encontró 9 secuencias con estos adaptadores.</p>
-<p>Si usamos el comando <code>ls</code> podemos ver que se generó un archivo de resultados llamado <code>Trimmed_Partial_SRR2467141.fastq</code>.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">ls</span></code></pre></div>
-<pre class="output"><code>Partial_SRR2467141.fastq
-Partial_SRR2467142.fastq
-Partial_SRR2467143.fastq
-Partial_SRR2467144.fastq
-Partial_SRR2467145.fastq
-Partial_SRR2467146.fastq
-Partial_SRR2467147.fastq
-Partial_SRR2467148.fastq
-Partial_SRR2467149.fastq
-Partial_SRR2467150.fastq
-Partial_SRR2467151.fastq
-QUAL
-**Trimmed_Partial_SRR2467141.fastq**
-TruSeq3-SE.fa</code></pre>
-<aside class="callout panel panel-info">
-<div class="panel-heading">
-<h2 id="problemas-de-memoria"><span class="glyphicon glyphicon-pushpin"></span>Problemas de memoria</h2>
-</div>
-<div class="panel-body">
-<p>En cuanto empieces a utilizar java para análisis de secuenciación frecuentemente te encontrarás con problemas de memoria. Estos se resuelven especificando exactamente cuanta memoria le permites asignar a Java usando las banderas:</p>
-<pre class="output"><code>-Xms&lt;size&gt;        set initial Java heap size
--Xmx&lt;size&gt;        set maximum Java heap size</code></pre>
-<p>En nuestro caso escribiriamos el comando:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">java</span> -Xms512m -Xmx2000m -jar /Users/uqslizbe/Applications/Trimmomatic-0.36/trimmomatic-0.36.jar SE Partial_SRR2467141.fastq Trimmed_Partial_SRR2467141.fastq ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 HEADCROP:10 SLIDINGWINDOW:4:15 MINLEN:60</code></pre></div>
-<p>Solo debes asegurarte que la memoria que pides es congruente con los recursos disponibles en tu computadora o servidor.</p>
-</div>
-</aside>
-<p>Revisemos ahora los resultados de nuestra limpieza de secuencias. Primero veremos las primeras líneas del archivo limpio.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">head</span> -n 12 Trimmed_Partial_SRR2467141.fastq</code></pre></div>
-<pre class="output"><code>@SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-TCGTTCTTCTTGAAGAAGACGTTACCTACGGCGTATTTGCCCATCTCAGGTATGTCTAGATCAAGATCTAACTTGAATTCTCTTTTCATAA
-+SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-HB?&lt;?CFGGGC9@FF@GGGG&gt;EEEDGDHGFHGE;AEFH&gt;AC@D;@B&gt;C&gt;CCC@C&gt;&gt;DDCC3:&gt;AA5&gt;CC&gt;&gt;CCD&gt;@CCDCDCCCCC@C@&gt;C
-@SRR2467141.2 SALLY:472:C6NCDACXX:8:1101:1326:1950 length=101
-CTGGCCAAATGCCCCATTATTTTGAGTATTGTTATTTCCAAATAAACTGTTACTATTACTGCCAGCGGCAGAAGTGAATCCACAGATC
-+SRR2467141.2 SALLY:472:C6NCDACXX:8:1101:1326:1950 length=101
-FH?GEHEHIDEHCCFEHIE@GIGCHG&lt;DGGIHIGIGGIGHIIFIHFFGDHGGIIHIGIIIIGGEH@EADB&gt;=AA&gt;3@&gt;CCCCCCBC@C
-@SRR2467141.3 SALLY:472:C6NCDACXX:8:1101:1477:1959 length=101
-TTAGGCACATCATCCTGATAAGTGTACTTACCAGGATATATACCATCGGTATTGATGTTATCGGCATCACATAAAACTAATTCACCAGAAA
-+SRR2467141.3 SALLY:472:C6NCDACXX:8:1101:1477:1959 length=101
-HHHJJJIIJJIJJJJJJEIJJJIIJJJIJIJJIJJIIIJJJIIIHIIIJDHIJJIGJJIJJJJJIHHHFFFFFEEEEEEDDEDDDDDDDDD</code></pre>
-<p>Podemos ver que hasta en las primeras líneas se efectuaron cortes, en su mayoría en el extremo 3’.</p>
-<p>Revisemos ahora los resultados globales usando FastQC:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">fastqc</span> -O ./QUAL/ Trimmed_Partial_SRR2467141.fastq </code></pre></div>
-<pre class="output"><code>Started analysis of Trimmed_Partial_SRR2467141.fastq
-Approx 20% complete for Trimmed_Partial_SRR2467141.fastq
-Approx 40% complete for Trimmed_Partial_SRR2467141.fastq
-Approx 60% complete for Trimmed_Partial_SRR2467141.fastq
-Approx 80% complete for Trimmed_Partial_SRR2467141.fastq
-Analysis complete for Trimmed_Partial_SRR2467141.fastq</code></pre>
-<p>Abrimos el resultado html <a href="http://liz-fernandez.github.io/transcriptome_analysis/Trimmed_Partial_SRR2467141_fastqc.html">Trimmed_Partial_SRR2467141_fastqc.html</a>.</p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
 <h2 id="qué-diferencias-hay-entre-las-secuencias-crudas-y-limpias"><span class="glyphicon glyphicon-pencil"></span>¿Qué diferencias hay entre las secuencias crudas y limpias?</h2>
