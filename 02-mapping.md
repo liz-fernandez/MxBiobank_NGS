@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Non-model Genomics
-subtitle: Alineamiento de lecturas
+title: NGS – from fastq to variant annotation
+subtitle: Read alignment
 minutes: 5
 ---
 > ## Learning Objectives {.objectives}
@@ -12,89 +12,149 @@ minutes: 5
 
 We will use the fastq files that we used in the previous practice, as well as the reference genome of our organism, *Saccharomyces pombe*:
 
-~~~ {.output}
-$ wget https://liz-fernandez.github.io/MxBiobank_NGS/datasets/genome/Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa
+~~~ {.bash}
+$ cd .. 
+$ pwd 
 ~~~
 
-## Mapping the filtered reads to the genome
+~~~ {.output}
+/Data/VariantCalling
+~~~
+
+Characteristics of the experiment:
+
+Yeast genome: 12.5 Mbp; 16 chromosomes
+Whole genome sequencing
+Paired-end reads, 108bp, one library, 2 lanes
+
+## Mapping the reads to the genome
 
 Once we verify that the reads are in the correct format, we will align the reads and transcripts to the genome using BWA.
 
 You can find the manual in the following[link](http://bio-bwa.sourceforge.net/bwa.shtml).
 
+
+~~~ {.bash}
+$ bwa
+~~~
+
+~~~ {.output}
+Program: bwa (alignment via Burrows-Wheeler transformation)
+Version: 0.7.17-r1188
+Contact: Heng Li <lh3@sanger.ac.uk>
+
+Usage:   bwa <command> [options]
+
+Command: index         index sequences in the FASTA format
+         mem           BWA-MEM algorithm
+         fastmap       identify super-maximal exact matches
+         pemerge       merge overlapping paired ends (EXPERIMENTAL)
+         aln           gapped/ungapped alignment
+         samse         generate alignment (single ended)
+         sampe         generate alignment (paired ended)
+         bwasw         BWA-SW for long queries
+
+         shm           manage indices in shared memory
+         fa2pac        convert FASTA to PAC format
+         pac2bwt       generate BWT from PAC
+         pac2bwtgen    alternative algorithm for generating BWT
+         bwtupdate     update .bwt to the new format
+         bwt2sa        generate SA from BWT and Occ
+
+Note: To use BWA, you need to first index the genome with `bwa index'.
+      There are three alignment algorithms in BWA: `mem', `bwasw', and
+      `aln/samse/sampe'. If you are not sure which to use, try `bwa mem'
+      first. Please `man ./bwa.1' for the manual.
+~~~
+
 First we will generate a bwa index for the genome:
 
 ~~~ {.bash}
-$ bowtie2-build Sp_genome.fa Sp_genome 
+$ bwa index -a is Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa
 ~~~
 
 ~~~ {.output}
-
+[bwa_index] Pack FASTA... 0.12 sec
+[bwa_index] Construct BWT for the packed sequence...
+[bwa_index] 7.56 seconds elapse.
+[bwa_index] Update BWT... 0.07 sec
+[bwa_index] Pack forward-only FASTA... 0.07 sec
+[bwa_index] Construct SA from BWT and Occ... 3.67 sec
+[main] Version: 0.7.17-r1188
+[main] CMD: bwa index -a is Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa
+[main] Real time: 12.089 sec; CPU: 11.490 sec
 ~~~
+
+~~~ {.bash}
+$ ls Saccharomyces*
+~~~
+
+~~~ {.output}
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa  
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.amb
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.ann
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.bwt
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.pac
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.sa
+~~~
+
+All new files that do not end with .fa form the bwa index. 
+
+For aligning the reads we will be using bwa mem, we check its manual:
+
+~~~ {.bash}
+$ bwa mem
+~~~
+
+Some commonly used options include:
+
+-t	number of threads/processors to use – see PBS script at end of workbook
+-p 	Assume the first input query file is interleaved paired-end FASTA/Q. See the command description for details. 
+-a	Output all found alignments for single-end or unpaired paired-end reads. These alignments will be flagged as secondary alignments.
  
-~~~ {.bash}
-$ ls *bt2
-~~~ 
-
-~~~ {.output}
-Sp_genome.1.bt2        
-Sp_genome.2.bt2              
-Sp_genome.3.bt2       
-Sp_genome.4.bt2           
-Sp_genome.rev.1.bt2          
-Sp_genome.rev.2.bt2
-~~~
-
-Usamos tophat2 para mapear las lecturas. Este programa nos permite dividir lecturas
-que atraviesan sitios de splicing:
+We will use default options:
 
 ~~~ {.bash}
-$ tophat2 -I 300 -i 20 Sp_genome \
- Sp_log.left.fq.gz,Sp_hs.left.fq.gz,Sp_ds.left.fq.gz,Sp_plat.left.fq.gz \
- Sp_log.right.fq.gz,Sp_hs.right.fq.gz,Sp_ds.right.fq.gz,Sp_plat.right.fq.gz
+$ bwa mem Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa lane1/s-7-1.fastq lane1/s-7-2.fastq > lane1.sam
 ~~~ 
 
-~~~ {.output}
-[2017-01-24 13:53:23] Beginning TopHat run (v2.1.1)
------------------------------------------------
-[2017-01-24 13:53:23] Checking for Bowtie
-		  Bowtie version:	 2.2.8.0
-[2017-01-24 13:53:23] Checking for Bowtie index files (genome)..
-[2017-01-24 13:53:23] Checking for reference FASTA file
-[2017-01-24 13:53:23] Generating SAM header for Sp_genome
-[2017-01-24 13:53:23] Preparing reads
-	 left reads: min. length=25, max. length=68, 329455 kept reads (431 discarded)
-	right reads: min. length=25, max. length=68, 329725 kept reads (161 discarded)
-[2017-01-24 13:53:31] Mapping left_kept_reads to genome Sp_genome with Bowtie2
-[2017-01-24 13:53:44] Mapping left_kept_reads_seg1 to genome Sp_genome with Bowtie2 (1/2)
-[2017-01-24 13:53:44] Mapping left_kept_reads_seg2 to genome Sp_genome with Bowtie2 (2/2)
-[2017-01-24 13:53:44] Mapping right_kept_reads to genome Sp_genome with Bowtie2
-[2017-01-24 13:53:57] Mapping right_kept_reads_seg1 to genome Sp_genome with Bowtie2 (1/2)
-[2017-01-24 13:53:57] Mapping right_kept_reads_seg2 to genome Sp_genome with Bowtie2 (2/2)
-[2017-01-24 13:53:57] Searching for junctions via segment mapping
-	Coverage-search algorithm is turned on, making this step very slow
-	Please try running TopHat again with the option (--no-coverage-search) if this step takes too much time or memory.
-[2017-01-24 13:54:02] Retrieving sequences for splices
-[2017-01-24 13:54:02] Indexing splices
-Building a SMALL index
-[2017-01-24 13:54:02] Mapping left_kept_reads_seg1 to genome segment_juncs with Bowtie2 (1/2)
-[2017-01-24 13:54:02] Mapping left_kept_reads_seg2 to genome segment_juncs with Bowtie2 (2/2)
-[2017-01-24 13:54:02] Joining segment hits
-[2017-01-24 13:54:03] Mapping right_kept_reads_seg1 to genome segment_juncs with Bowtie2 (1/2)
-[2017-01-24 13:54:03] Mapping right_kept_reads_seg2 to genome segment_juncs with Bowtie2 (2/2)
-[2017-01-24 13:54:03] Joining segment hits
-[2017-01-24 13:54:04] Reporting output tracks
------------------------------------------------
-[2017-01-24 13:54:30] A summary of the alignment counts can be found in ./tophat_out/align_summary.txt
-[2017-01-24 13:54:30] Run complete: 00:01:07 elapsed
-~~~
+We omit the output.
 
 We explore the result, which is a file in SAM format.
 
 ~~~ {.bash}
-$ module load samtools
-$ samtools view tophat_out/accepted_hits.bam | head
+$ head lane1.sam
 ~~~ 
+
+~~~ {.output}
+@SQ	SN:I	LN:230218
+@SQ	SN:II	LN:813184
+@SQ	SN:III	LN:316620
+@SQ	SN:IV	LN:1531933
+@SQ	SN:IX	LN:439888
+@SQ	SN:Mito	LN:85779
+@SQ	SN:V	LN:576874
+@SQ	SN:VI	LN:270161
+@SQ	SN:VII	LN:1090940
+@SQ	SN:VIII	LN:562643
+~~~ 
+
+~~~ {.bash}
+$ tail lane1.sam
+~~~ 
+
+~~~ {.output}
+IL29_4505:7:120:19585:18832#2	77	*	0	0	*	*	0	0	GATCGGAAGAGCGGTTCAGCAGGAAATGCCGAGACCGATCTCCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAACAAACCACATAACTACATCTCCACG	CCBCBDCCCBBBBBBCBCBBBDCBCBAACBCBBBBAAAAAB=BB<?BABAAA.ABBAA?89BBCCBA;AA-B0B@AAAAB(--(%$&$-3$%$'*6<).635%'+*/*	AS:i:0	XS:i:0
+IL29_4505:7:120:19585:18832#2	141	*	0	0	*	*	0	0	GATCGGAAGAGCGGCGGGGAGGGGAAGAGGGGAGATCTCGGGGGGCGCCGGATCATTAAAAAAAAAAAAAAAAAAAGGACGTAAACCGTGATATCTCCGTCCGCGTGA	@64<;?27134)2)0.&1'$8=9.14-'2&1(/*/,,2424*49'&1%0,&)/'-*0(43>>>>>>>>33&.*&)%$'&$&$(%$$$$*$%)%&)$%($),%$+$&$&	AS:i:0	XS:i:0
+IL29_4505:7:120:19710:18114#2	77	*	0	0	*	*	0	0	GATCGGAAGAGCGGTTCAGCAGGGAATGCCGAGACCGATCTCCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAACACACAAACACATGACTGTGACGATG	AABBBBBBBABBBBABABB:BBBAABBBBBBBBAB?AABABBABBABAABAA5?ABA?BB@<B@@<9>>;)=:?4AA=9B,3(0$(-'(%-)0&%*.,'*$$,&&-13	AS:i:0	XS:i:0
+IL29_4505:7:120:19710:18114#2	141	*	0	0	*	*	0	0	GATCGGAAGAGCGTCGGGTAGGGAAAGAGGGAAGATCTCGGGGGCCGCCGTATCATTAAAAAAAAAAAAAACACAACAATCAAACTCTACCACACCTGGCACACGCGA	?4+=@?3333,&7%-:,/0((;<-6/).5*2&16)(02*77&52&&1'*+*-//0333-5=71144%)+$$'%$%&&&(%%%-%*%-$$*&&*$$$$*$-$,%'%%'%	AS:i:0	XS:i:0
+IL29_4505:7:120:19764:17570#2	77	*	0	0	*	*	0	0	GATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCCGAAGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAACTAAGACACGATACCATCTCACCGCT	BBCB@?AAA?BABAA@C:CAAAB<AC?@7C<B?8BACABBB?BB<C?@?B?*9?==B?@??=ABAAABA?BAAAA0;97;(.%+<1*&*&(%&&$(',&(%+.,+5=%	AS:i:0	XS:i:0
+IL29_4505:7:120:19764:17570#2	141	*	0	0	*	*	0	0	GATCGGAAGCGCGGCGTGTGGGGCCAGAGTGTAGAGCTGGGTGGTCGCCGCATACTTTAAAAAAGATAATGAGATCATGCGAAGTGTATCTGCAAGTGGATCTAATAC	<@+>=9(93);72'=9,,)+222&'(5*,.7'10&'3,'6*'1<%&9)*4%/&(%0.%*)5<>4%/$%%%)$('(+,%.*-&)/(%'(&%(*5&)'$&()31*,).-%	AS:i:0	XS:i:0
+IL29_4505:7:120:19773:11846#2	77	*	0	0	*	*	0	0	CCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAACACAAAAGAAACATACTCTATCAAGATACATGCTAGTAACGAAAACACACACATGACTCCACACTGTGATG	A@@*@@6@@@@>@@<:@;@@:A;A?@/@4@@6@@@:A+;4>&9,$$,'%%'1-(%6%/:,(*/%&&%'(7,55(04*''84%8,-.%+1/(&)&&)%&%&%%&*$%1.	AS:i:0	XS:i:0
+IL29_4505:7:120:19773:11846#2	141	*	0	0	*	*	0	0	GATTTCATAAACACAGGCCTGAATGTAGACAGGTCACTAGAGATACCGTCACAAACAAAACATCAATACTAACAACAACTACTACAATCACCACACACATCACCACAC	*.(=4'0*'1'/;6/-(**(20((46'('2**(5-*,5(**'8764.*.((</'./'&3(.6,*(;-'*-*(8,+''*/(<0*(*'.'((-7'*3/'/)'(7)'5/'0	AS:i:0	XS:i:0
+IL29_4505:7:120:19817:15837#2	77	*	0	0	*	*	0	0	ATTTTTAGTATACGTGAATAATGTATTTTTTAAATTGGTTATTGCGTAGGAACACAATATTTTAAACCTTATCGATTAATTTTACTTGACTGAGTACGAGCGCCAGCT	ABA8A@BB8BBBBBA?BBBB;ABAB@>9?B/;@8B@>A??B6:BA@AAB?BB/=A:?@;AB@BB8ABB@BA@B>/ABB>BB-?B/A3.<=.=>3<B/<B82'077.*9	AS:i:0	XS:i:0
+IL29_4505:7:120:19817:15837#2	141	*	0	0	*	*	0	0	AAAAAAAAAAAAAACGGTGGACTAAAACACCCGGTCGTTGAAACAAAATTTGATAAATGTCTAAAGGCATTTACATGTCCTACATCCAATCATATGACTTTTGTTTCC	=2=,=,(-8179+4('(-))1&)-'(,/2**''&)*83(&:21))7)'6++%1)('3%'))%%'2%&(:2''1&*2&''&'8+040&3*2,<'2-%3&&'--'(*'%-	AS:i:0	XS:i:0
+~~~
 
 ### The SAM format
 
@@ -192,38 +252,24 @@ using scripts that show alignment statistics. Programs like
 this type of analysis.
 
 The compressed version of the SAM files is known as BAM (binary sam).
-Let's convert the BAM file to SAM using samtools:
+Let's convert the SAM file to BAM using samtools:
 
 ~~~ {.bash}
-$ samtools view tophat_out/accepted_hits.bam > tophat_out/accepted_hits.sam
+$ samtools view -b lane1.sam -o lane1.bam
 ~~~
 
-We do not open the SAM files because, since they are in binary format, they are illegible.
+We do not open the BAM files because, since they are in binary format, they are illegible.
 However, we have to perform two last steps to visualize
 the results:
 
 ~~~ {.bash}
-$ samtools sort tophat_out/accepted_hits.bam > tophat_out/sorted_accepted_hits.bam
-$ samtools index tophat_out/sorted_accepted_hits.bam
+$ samtools sort lane1.bam -o lane1_sorted.bam
+$ samtools index lane1_sorted.bam
 ~~~
 
 The first step orders the results by their coordinates and the second one creates indexes
 to speed up the display using a browser.
 
-> ## Task - Aligning the filtered readings to the transcriptome {.challenge}
->
-> We have aligned the readings to the genome but we also want to align them directly
-> to the transcriptome. We are going to review the TopHat2 manual and use the options
-> that allows us to map readings directly to transcriptomes.
->
-> * **Clue:** You can not use the previously generated index.
->
-> ### Solution
->
-> ~~~ {.bash}
-> $ bowtie2-build ./trinity_out_dir/Trinity.fasta Trinity_assembly_Sp
-> $ tophat2 -I 300 -i 20 Trinity_assembly_Sp Sp_ds.left.fq.gz,Sp_hs.left.fq.gz,Sp_log.left.fq.gz,Sp_plat.left.fq.gz Sp_ds.right.fq.gz,Sp_hs.right.fq.gz,Sp_log.right.fq.gz,Sp_plat.right.fq.gz
-> ~~~
 
 
 

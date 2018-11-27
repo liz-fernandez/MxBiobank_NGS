@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>TIB2017: Non-model Genomics</title>
+    <title>TIB2017: NGS – from fastq to variant annotation</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -27,8 +27,8 @@
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
-                    <a href="index.html"><h1 class="title">Non-model Genomics</h1></a>
-          <h2 class="subtitle">Alineamiento de lecturas</h2>
+                    <a href="index.html"><h1 class="title">NGS – from fastq to variant annotation</h1></a>
+          <h2 class="subtitle">Read alignment</h2>
           <section class="objectives panel panel-warning">
 <div class="panel-heading">
 <h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
@@ -42,59 +42,90 @@
 </div>
 </section>
 <p>We will use the fastq files that we used in the previous practice, as well as the reference genome of our organism, <em>Saccharomyces pombe</em>:</p>
-<pre class="output"><code>$ wget https://liz-fernandez.github.io/MxBiobank_NGS/datasets/genome/Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa</code></pre>
-<h2 id="mapping-the-filtered-reads-to-the-genome">Mapping the filtered reads to the genome</h2>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cd</span> .. 
+$ <span class="kw">pwd</span> </code></pre></div>
+<pre class="output"><code>/Data/VariantCalling</code></pre>
+<p>Characteristics of the experiment:</p>
+<p>Yeast genome: 12.5 Mbp; 16 chromosomes Whole genome sequencing Paired-end reads, 108bp, one library, 2 lanes</p>
+<h2 id="mapping-the-reads-to-the-genome">Mapping the reads to the genome</h2>
 <p>Once we verify that the reads are in the correct format, we will align the reads and transcripts to the genome using BWA.</p>
 <p>You can find the manual in the following<a href="http://bio-bwa.sourceforge.net/bwa.shtml">link</a>.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bwa</span></code></pre></div>
+<pre class="output"><code>Program: bwa (alignment via Burrows-Wheeler transformation)
+Version: 0.7.17-r1188
+Contact: Heng Li &lt;lh3@sanger.ac.uk&gt;
+
+Usage:   bwa &lt;command&gt; [options]
+
+Command: index         index sequences in the FASTA format
+         mem           BWA-MEM algorithm
+         fastmap       identify super-maximal exact matches
+         pemerge       merge overlapping paired ends (EXPERIMENTAL)
+         aln           gapped/ungapped alignment
+         samse         generate alignment (single ended)
+         sampe         generate alignment (paired ended)
+         bwasw         BWA-SW for long queries
+
+         shm           manage indices in shared memory
+         fa2pac        convert FASTA to PAC format
+         pac2bwt       generate BWT from PAC
+         pac2bwtgen    alternative algorithm for generating BWT
+         bwtupdate     update .bwt to the new format
+         bwt2sa        generate SA from BWT and Occ
+
+Note: To use BWA, you need to first index the genome with `bwa index&#39;.
+      There are three alignment algorithms in BWA: `mem&#39;, `bwasw&#39;, and
+      `aln/samse/sampe&#39;. If you are not sure which to use, try `bwa mem&#39;
+      first. Please `man ./bwa.1&#39; for the manual.</code></pre>
 <p>First we will generate a bwa index for the genome:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bowtie2-build</span> Sp_genome.fa Sp_genome </code></pre></div>
-<pre class="output"><code></code></pre>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">ls</span> *bt2</code></pre></div>
-<pre class="output"><code>Sp_genome.1.bt2        
-Sp_genome.2.bt2              
-Sp_genome.3.bt2       
-Sp_genome.4.bt2           
-Sp_genome.rev.1.bt2          
-Sp_genome.rev.2.bt2</code></pre>
-<p>Usamos tophat2 para mapear las lecturas. Este programa nos permite dividir lecturas que atraviesan sitios de splicing:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">tophat2</span> -I 300 -i 20 Sp_genome \
- Sp_log.left.fq.gz,Sp_hs.left.fq.gz,Sp_ds.left.fq.gz,Sp_plat.left.fq.gz \
- Sp_log.right.fq.gz,Sp_hs.right.fq.gz,Sp_ds.right.fq.gz,Sp_plat.right.fq.gz</code></pre></div>
-<pre class="output"><code>[2017-01-24 13:53:23] Beginning TopHat run (v2.1.1)
------------------------------------------------
-[2017-01-24 13:53:23] Checking for Bowtie
-          Bowtie version:    2.2.8.0
-[2017-01-24 13:53:23] Checking for Bowtie index files (genome)..
-[2017-01-24 13:53:23] Checking for reference FASTA file
-[2017-01-24 13:53:23] Generating SAM header for Sp_genome
-[2017-01-24 13:53:23] Preparing reads
-     left reads: min. length=25, max. length=68, 329455 kept reads (431 discarded)
-    right reads: min. length=25, max. length=68, 329725 kept reads (161 discarded)
-[2017-01-24 13:53:31] Mapping left_kept_reads to genome Sp_genome with Bowtie2
-[2017-01-24 13:53:44] Mapping left_kept_reads_seg1 to genome Sp_genome with Bowtie2 (1/2)
-[2017-01-24 13:53:44] Mapping left_kept_reads_seg2 to genome Sp_genome with Bowtie2 (2/2)
-[2017-01-24 13:53:44] Mapping right_kept_reads to genome Sp_genome with Bowtie2
-[2017-01-24 13:53:57] Mapping right_kept_reads_seg1 to genome Sp_genome with Bowtie2 (1/2)
-[2017-01-24 13:53:57] Mapping right_kept_reads_seg2 to genome Sp_genome with Bowtie2 (2/2)
-[2017-01-24 13:53:57] Searching for junctions via segment mapping
-    Coverage-search algorithm is turned on, making this step very slow
-    Please try running TopHat again with the option (--no-coverage-search) if this step takes too much time or memory.
-[2017-01-24 13:54:02] Retrieving sequences for splices
-[2017-01-24 13:54:02] Indexing splices
-Building a SMALL index
-[2017-01-24 13:54:02] Mapping left_kept_reads_seg1 to genome segment_juncs with Bowtie2 (1/2)
-[2017-01-24 13:54:02] Mapping left_kept_reads_seg2 to genome segment_juncs with Bowtie2 (2/2)
-[2017-01-24 13:54:02] Joining segment hits
-[2017-01-24 13:54:03] Mapping right_kept_reads_seg1 to genome segment_juncs with Bowtie2 (1/2)
-[2017-01-24 13:54:03] Mapping right_kept_reads_seg2 to genome segment_juncs with Bowtie2 (2/2)
-[2017-01-24 13:54:03] Joining segment hits
-[2017-01-24 13:54:04] Reporting output tracks
------------------------------------------------
-[2017-01-24 13:54:30] A summary of the alignment counts can be found in ./tophat_out/align_summary.txt
-[2017-01-24 13:54:30] Run complete: 00:01:07 elapsed</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bwa</span> index -a is Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa</code></pre></div>
+<pre class="output"><code>[bwa_index] Pack FASTA... 0.12 sec
+[bwa_index] Construct BWT for the packed sequence...
+[bwa_index] 7.56 seconds elapse.
+[bwa_index] Update BWT... 0.07 sec
+[bwa_index] Pack forward-only FASTA... 0.07 sec
+[bwa_index] Construct SA from BWT and Occ... 3.67 sec
+[main] Version: 0.7.17-r1188
+[main] CMD: bwa index -a is Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa
+[main] Real time: 12.089 sec; CPU: 11.490 sec</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">ls</span> Saccharomyces*</code></pre></div>
+<pre class="output"><code>Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa  
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.amb
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.ann
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.bwt
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.pac
+Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa.sa</code></pre>
+<p>All new files that do not end with .fa form the bwa index.</p>
+<p>For aligning the reads we will be using bwa mem, we check its manual:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bwa</span> mem</code></pre></div>
+<p>Some commonly used options include:</p>
+<p>-t number of threads/processors to use – see PBS script at end of workbook -p Assume the first input query file is interleaved paired-end FASTA/Q. See the command description for details. -a Output all found alignments for single-end or unpaired paired-end reads. These alignments will be flagged as secondary alignments.</p>
+<p>We will use default options:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bwa</span> mem Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa lane1/s-7-1.fastq lane1/s-7-2.fastq <span class="kw">&gt;</span> lane1.sam</code></pre></div>
+<p>We omit the output.</p>
 <p>We explore the result, which is a file in SAM format.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">module</span> load samtools
-$ <span class="kw">samtools</span> view tophat_out/accepted_hits.bam <span class="kw">|</span> <span class="kw">head</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">head</span> lane1.sam</code></pre></div>
+<pre class="output"><code>@SQ SN:I    LN:230218
+@SQ SN:II   LN:813184
+@SQ SN:III  LN:316620
+@SQ SN:IV   LN:1531933
+@SQ SN:IX   LN:439888
+@SQ SN:Mito LN:85779
+@SQ SN:V    LN:576874
+@SQ SN:VI   LN:270161
+@SQ SN:VII  LN:1090940
+@SQ SN:VIII LN:562643</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">tail</span> lane1.sam</code></pre></div>
+<pre class="output"><code>IL29_4505:7:120:19585:18832#2   77  *   0   0   *   *   0   0   GATCGGAAGAGCGGTTCAGCAGGAAATGCCGAGACCGATCTCCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAACAAACCACATAACTACATCTCCACG    CCBCBDCCCBBBBBBCBCBBBDCBCBAACBCBBBBAAAAAB=BB&lt;?BABAAA.ABBAA?89BBCCBA;AA-B0B@AAAAB(--(%$&amp;$-3$%$&#39;*6&lt;).635%&#39;+*/*    AS:i:0  XS:i:0
+IL29_4505:7:120:19585:18832#2   141 *   0   0   *   *   0   0   GATCGGAAGAGCGGCGGGGAGGGGAAGAGGGGAGATCTCGGGGGGCGCCGGATCATTAAAAAAAAAAAAAAAAAAAGGACGTAAACCGTGATATCTCCGTCCGCGTGA    @64&lt;;?27134)2)0.&amp;1&#39;$8=9.14-&#39;2&amp;1(/*/,,2424*49&#39;&amp;1%0,&amp;)/&#39;-*0(43&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;33&amp;.*&amp;)%$&#39;&amp;$&amp;$(%$$$$*$%)%&amp;)$%($),%$+$&amp;$&amp;    AS:i:0  XS:i:0
+IL29_4505:7:120:19710:18114#2   77  *   0   0   *   *   0   0   GATCGGAAGAGCGGTTCAGCAGGGAATGCCGAGACCGATCTCCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAACACACAAACACATGACTGTGACGATG    AABBBBBBBABBBBABABB:BBBAABBBBBBBBAB?AABABBABBABAABAA5?ABA?BB@&lt;B@@&lt;9&gt;&gt;;)=:?4AA=9B,3(0$(-&#39;(%-)0&amp;%*.,&#39;*$$,&amp;&amp;-13    AS:i:0  XS:i:0
+IL29_4505:7:120:19710:18114#2   141 *   0   0   *   *   0   0   GATCGGAAGAGCGTCGGGTAGGGAAAGAGGGAAGATCTCGGGGGCCGCCGTATCATTAAAAAAAAAAAAAACACAACAATCAAACTCTACCACACCTGGCACACGCGA    ?4+=@?3333,&amp;7%-:,/0((;&lt;-6/).5*2&amp;16)(02*77&amp;52&amp;&amp;1&#39;*+*-//0333-5=71144%)+$$&#39;%$%&amp;&amp;&amp;(%%%-%*%-$$*&amp;&amp;*$$$$*$-$,%&#39;%%&#39;%    AS:i:0  XS:i:0
+IL29_4505:7:120:19764:17570#2   77  *   0   0   *   *   0   0   GATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCCGAAGTTTATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAACTAAGACACGATACCATCTCACCGCT    BBCB@?AAA?BABAA@C:CAAAB&lt;AC?@7C&lt;B?8BACABBB?BB&lt;C?@?B?*9?==B?@??=ABAAABA?BAAAA0;97;(.%+&lt;1*&amp;*&amp;(%&amp;&amp;$(&#39;,&amp;(%+.,+5=%    AS:i:0  XS:i:0
+IL29_4505:7:120:19764:17570#2   141 *   0   0   *   *   0   0   GATCGGAAGCGCGGCGTGTGGGGCCAGAGTGTAGAGCTGGGTGGTCGCCGCATACTTTAAAAAAGATAATGAGATCATGCGAAGTGTATCTGCAAGTGGATCTAATAC    &lt;@+&gt;=9(93);72&#39;=9,,)+222&amp;&#39;(5*,.7&#39;10&amp;&#39;3,&#39;6*&#39;1&lt;%&amp;9)*4%/&amp;(%0.%*)5&lt;&gt;4%/$%%%)$(&#39;(+,%.*-&amp;)/(%&#39;(&amp;%(*5&amp;)&#39;$&amp;()31*,).-%    AS:i:0  XS:i:0
+IL29_4505:7:120:19773:11846#2   77  *   0   0   *   *   0   0   CCGATGTTTATCTCGTATGCCGTCTTCTGCTTGAAAACACAAAAGAAACATACTCTATCAAGATACATGCTAGTAACGAAAACACACACATGACTCCACACTGTGATG    A@@*@@6@@@@&gt;@@&lt;:@;@@:A;A?@/@4@@6@@@:A+;4&gt;&amp;9,$$,&#39;%%&#39;1-(%6%/:,(*/%&amp;&amp;%&#39;(7,55(04*&#39;&#39;84%8,-.%+1/(&amp;)&amp;&amp;)%&amp;%&amp;%%&amp;*$%1.    AS:i:0  XS:i:0
+IL29_4505:7:120:19773:11846#2   141 *   0   0   *   *   0   0   GATTTCATAAACACAGGCCTGAATGTAGACAGGTCACTAGAGATACCGTCACAAACAAAACATCAATACTAACAACAACTACTACAATCACCACACACATCACCACAC    *.(=4&#39;0*&#39;1&#39;/;6/-(**(20((46&#39;(&#39;2**(5-*,5(**&#39;8764.*.((&lt;/&#39;./&#39;&amp;3(.6,*(;-&#39;*-*(8,+&#39;&#39;*/(&lt;0*(*&#39;.&#39;((-7&#39;*3/&#39;/)&#39;(7)&#39;5/&#39;0    AS:i:0  XS:i:0
+IL29_4505:7:120:19817:15837#2   77  *   0   0   *   *   0   0   ATTTTTAGTATACGTGAATAATGTATTTTTTAAATTGGTTATTGCGTAGGAACACAATATTTTAAACCTTATCGATTAATTTTACTTGACTGAGTACGAGCGCCAGCT    ABA8A@BB8BBBBBA?BBBB;ABAB@&gt;9?B/;@8B@&gt;A??B6:BA@AAB?BB/=A:?@;AB@BB8ABB@BA@B&gt;/ABB&gt;BB-?B/A3.&lt;=.=&gt;3&lt;B/&lt;B82&#39;077.*9    AS:i:0  XS:i:0
+IL29_4505:7:120:19817:15837#2   141 *   0   0   *   *   0   0   AAAAAAAAAAAAAACGGTGGACTAAAACACCCGGTCGTTGAAACAAAATTTGATAAATGTCTAAAGGCATTTACATGTCCTACATCCAATCATATGACTTTTGTTTCC    =2=,=,(-8179+4(&#39;(-))1&amp;)-&#39;(,/2**&#39;&#39;&amp;)*83(&amp;:21))7)&#39;6++%1)(&#39;3%&#39;))%%&#39;2%&amp;(:2&#39;&#39;1&amp;*2&amp;&#39;&#39;&amp;&#39;8+040&amp;3*2,&lt;&#39;2-%3&amp;&amp;&#39;--&#39;(*&#39;%-    AS:i:0  XS:i:0</code></pre>
 <h3 id="the-sam-format">The SAM format</h3>
 <p>Let’s see a smaller example of this format. Suppose we have the following alignment:</p>
 <pre class="output"><code>Coor    12345678901234 5678901234567890123456789012345
@@ -162,26 +193,12 @@ r001    147 ref 37  30  9M  =   7   -39 CAGCGGCAT   *   NM:i:1</code></pre>
 </div>
 </aside>
 <p>As you can see these files contain a lot of information that can be analyzed using scripts that show alignment statistics. Programs like <a href="http://broadinstitute.github.io/picard/">Picard</a> perform this type of analysis.</p>
-<p>The compressed version of the SAM files is known as BAM (binary sam). Let’s convert the BAM file to SAM using samtools:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">samtools</span> view tophat_out/accepted_hits.bam <span class="kw">&gt;</span> tophat_out/accepted_hits.sam</code></pre></div>
-<p>We do not open the SAM files because, since they are in binary format, they are illegible. However, we have to perform two last steps to visualize the results:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">samtools</span> sort tophat_out/accepted_hits.bam <span class="kw">&gt;</span> tophat_out/sorted_accepted_hits.bam
-$ <span class="kw">samtools</span> index tophat_out/sorted_accepted_hits.bam</code></pre></div>
+<p>The compressed version of the SAM files is known as BAM (binary sam). Let’s convert the SAM file to BAM using samtools:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">samtools</span> view -b lane1.sam -o lane1.bam</code></pre></div>
+<p>We do not open the BAM files because, since they are in binary format, they are illegible. However, we have to perform two last steps to visualize the results:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">samtools</span> sort lane1.bam -o lane1_sorted.bam
+$ <span class="kw">samtools</span> index lane1_sorted.bam</code></pre></div>
 <p>The first step orders the results by their coordinates and the second one creates indexes to speed up the display using a browser.</p>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="task---aligning-the-filtered-readings-to-the-transcriptome"><span class="glyphicon glyphicon-pencil"></span>Task - Aligning the filtered readings to the transcriptome</h2>
-</div>
-<div class="panel-body">
-<p>We have aligned the readings to the genome but we also want to align them directly to the transcriptome. We are going to review the TopHat2 manual and use the options that allows us to map readings directly to transcriptomes.</p>
-<ul>
-<li><strong>Clue:</strong> You can not use the previously generated index.</li>
-</ul>
-<h3 id="solution">Solution</h3>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">bowtie2-build</span> ./trinity_out_dir/Trinity.fasta Trinity_assembly_Sp
-$ <span class="kw">tophat2</span> -I 300 -i 20 Trinity_assembly_Sp Sp_ds.left.fq.gz,Sp_hs.left.fq.gz,Sp_log.left.fq.gz,Sp_plat.left.fq.gz Sp_ds.right.fq.gz,Sp_hs.right.fq.gz,Sp_log.right.fq.gz,Sp_plat.right.fq.gz</code></pre></div>
-</div>
-</section>
         </div>
       </div>
       </article>

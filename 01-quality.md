@@ -7,49 +7,54 @@ minutes: 5
 
 > ## Learning objectives {.objectives}
 >
-> *   Entender el formato FastQ.
-> *   Entender el concepto de calidad de una secuencia. 
-> *   Aprender a utilizar software para medir y mejorar la calidad de datos de secuenciación masiva.
+> *   Understand the FastQ format.
+> *   Understand the concept of sequence quality. 
+> *   Learn how to use software to measure and improve the quality of massive sequencing data.
 
 ## Downloading the data
 
-The first thing we do when receiving our data is to download them. They are usually in a compressed format called tar. We can decompress the data using that same command:
+The first thing we do when receiving our data is to download them. They are usually in a compressed format. We can decompress the data using the `unzip` command:
 
 ~~~ {.bash}
-$ tar -xvf FastQC_Short.tar.gz
+$ unzip 'Alignment&VariantCalling.zip'
 ~~~
 
 This command decompresses a directory called `FastQC_Short`.
 We enter that directory:
 
 ~~~ {.bash}
-$ cd FastQC_Short
+$ cd VariantCalling
 ~~~
  
-Revise its content:
+Revise its contents:
 
 ~~~ {.bash}
 $ ls
 ~~~
+
 ~~~ {.output}
-Partial_SRR2467141.fastq 
-Partial_SRR2467142.fastq 
-Partial_SRR2467143.fastq 
-Partial_SRR2467144.fastq 
-Partial_SRR2467145.fastq 
-Partial_SRR2467146.fastq
-Partial_SRR2467147.fastq
-Partial_SRR2467148.fastq
-Partial_SRR2467149.fastq
-Partial_SRR2467150.fastq
-Partial_SRR2467151.fastq
+lane1  lane2  mito.intervals  Saccharomyces_cerevisiae.EF4.68.dna.toplevel.fa
 ~~~
 
-> ## El nombre de los archivos fastq {.callout}
+We will now look at the contents of the two "lane" directories:
+
+~~~ {.bash}
+$ ls lane*
+~~~
+
+~~~ {.output}
+lane1:
+s-7-1.fastq  s-7-2.fastq
+
+lane2:
+s-7-1.fastq  s-7-2.fastq
+~~~
+
+> ## The name of fastq files {.callout}
 >
-> En este caso el nombre de los archivos ha sido asignado de manera
-> arbitraria pero muchas veces contienen información importante. 
-> Por ejemplo, los archivos de Illumina generalmente tienen el siguiente formato:
+> In this case, the name of the files has been assigned in a
+> arbitrary but often contain important information.
+> For example, the Illumina files generally have the following format:
 >
 > ~~~ {.output}
 > <nombre de la muestra>_<secuencia identificadora (barcode)>_L<línea (3 dígitos)>_R<número de lectura (read)>_<número del set (3 dígitos)>.fastq.gz
@@ -62,22 +67,22 @@ Let's review one of the files using the head command. It usually shows us the fi
 10 lines of a file but with the `-n` flag will show us the first 12:
 
 ~~~ {.bash}
-$ head -n 12 Partial_SRR2467141.fastq 
+$ head -n 12 ./lane1/s-7-1.fastq
 ~~~
 
 ~~~ {.output}
-@SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-NTTATTTTTTTCGTTCTTCTTGAAGAAGACGTTACCTACGGCGTATTTGCCCATCTCAGGTATGTCTAGATCAAGATCTAACTTGAATTCTCTTTTCATAA
-+SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-#1:=BDDDHDHB?<?CFGGGC9@FF@GGGG>EEEDGDHGFHGE;AEFH>AC@D;@B>C>CCC@C>>DDCC3:>AA5>CC>>CCD>@CCDCDCCCCC@C@>C
-@SRR2467141.2 SALLY:472:C6NCDACXX:8:1101:1326:1950 length=101
-CACCCATTGACTGGCCAAATGCCCCATTATTTTGAGTATTGTTATTTCCAAATAAACTGTTACTATTACTGCCAGCGGCAGAAGTGAATCCACAGATCGGA
-+SRR2467141.2 SALLY:472:C6NCDACXX:8:1101:1326:1950 length=101
-??@DFFFFHHFH?GEHEHIDEHCCFEHIE@GIGCHG<DGGIHIGIGGIGHIIFIHFFGDHGGIIHIGIIIIGGEH@EADB>=AA>3@>CCCCCCBC@C###
-@SRR2467141.3 SALLY:472:C6NCDACXX:8:1101:1477:1959 length=101
-CATCTTTTCTTTAGGCACATCATCCTGATAAGTGTACTTACCAGGATATATACCATCGGTATTGATGTTATCGGCATCACATAAAACTAATTCACCAGAAA
-+SRR2467141.3 SALLY:472:C6NCDACXX:8:1101:1477:1959 length=101
-@CCFFFFFHHHHHJJJIIJJIJJJJJJEIJJJIIJJJIJIJJIJJIIIJJJIIIHIIIJDHIJJIGJJIJJJJJIHHHFFFFFEEEEEEDDEDDDDDDDDD
+@IL29_4505:7:24:8932:6562#2/1
+TAACGGTGGGTGAGTGGTAGTAAGTAGAGGGATGGATGGTGGTTCGGAGTGGTATGGTTGAATGGGACAGGGTAACGAGTGGAGAGTAGGGTAATGGAGGGTAAGTTC
++
+CDDCDDABBBABABABB@BCACBDABCBBAB@BBCABBBABB?CBCCABABBABBBBABA?ACBAAAAA?BB;BCAABA7AA?B?A??AAA>?A:AA?AA?%?AA@=9
+@IL29_4505:7:15:7929:11873#2/1
+TTAACGTTTCAATATGGTAGGTAGAACAACAGTACAGTGAGTGGGACATGGTGGATGGTAAAAGAATGGTAGGGTAAGTGGCAGTGGGGTTGGATATGGGTAATTGGA
++
+DDDDDDCDDCDDDDCCDBDDDACCCCCCCDCCBCDCCBCBCACCCBCBCCCACCACCCAAABABAABBC?ABBA=BBA?BAAAB?BABA7AAB?AAAAA@:A?AA?B-
+@IL29_4505:7:109:18599:8300#2/1
+CTTACCCTCCATTACCCTACCTCCACTCGTTACCCTGTCCCATTCAACCATACCACTCCGAACCACCATCCATCCCTCTACTTACTACCACTCACCCACCGTTACCCT
++
+D?BDCABBBABBDACCBBDCDCBBBBABBBCDABBBABBBBBCBA@ABCBCBB@BB0=BB4><B:BABAABBABA@AB=BB?ACBABA?AB;BBBABBBB'0=CB9<9
 ~~~
 
 This file is in `fastq` format. This is the format that most modern sequencing platforms generate. This format is a modification of the sequence format
@@ -103,27 +108,27 @@ of the sequenced nucleotides.
 We will take a single sequence as an example:
 
 ~~~ {.output}
-@SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-NTTATTTTTTTCGTTCTTCTTGAAGAAGACGTTACCTACGGCGTATTTGCCCATCTCAGGTATGTCTAGATCAAGATCTAACTTGAATTCTCTTTTCATAA
-+SRR2467141.1 SALLY:472:C6NCDACXX:8:1101:1392:1873 length=101
-#1:=BDDDHDHB?<?CFGGGC9@FF@GGGG>EEEDGDHGFHGE;AEFH>AC@D;@B>C>CCC@C>>DDCC3:>AA5>CC>>CCD>@CCDCDCCCCC@C@>C
+@IL29_4505:7:24:8932:6562#2/1
+TAACGGTGGGTGAGTGGTAGTAAGTAGAGGGATGGATGGTGGTTCGGAGTGGTATGGTTGAATGGGACAGGGTAACGAGTGGAGAGTAGGGTAATGGAGGGTAAGTTC
++
+CDDCDDABBBABABABB@BCACBDABCBBAB@BBCABBBABB?CBCCABABBABBBBABA?ACBAAAAA?BB;BCAABA7AA?B?A??AAA>?A:AA?AA?%?AA@=9
 ~~~
 
 We see that each sequence is represented by 4 lines.
 
-1. **Nombre de la secuencia** - Esta línea comienza con el símbolo `@`, seguido por el nombre de la lectura. 
-2. La **secuencia** nucleotídica. 
-3. **Segundo título** - Esta línea comienza con el símbolo `+`. Generalmente la información es la misma que en la primera línea pero también puede estar en blanco siempre y cuando contenga el símbolo de `+`.
-4. **Información de calidad** - Contiene una cadena de caracteres ASCII. Cada
-uno de estos caracteres corresponde a un nucleótido de la secuencia y representa la calidad del mismo. El puntaje de cada nucleótido indica el 
-nivel de confianza que se tiene en esa base. Niveles altos indican que la base se ha reportado correctamente mientras que niveles bajos sugieren 
-que hay incertidumbre acerca de la secuencia real en esta posición. 
+1. **Sequence name** - This line begins with the symbol `@`, followed by the read name. 
+2. The nucleotide **sequence**. 
+3. **Segundo título** - Esta línea comienza con el símbolo `+`. Generally the information is the same as in the first line but it can also be blank as long as it begins with the symbol `+`.
+4. **Quality information** - It contains an ASCII character string. Every
+one of these characters corresponds to a nucleotide of the sequence and represents the quality of the same. The score of each nucleotide indicates the
+level of confidence that you have in that base. High levels indicate that the base has been reported correctly while low levels suggest
+that there is uncertainty about the actual sequence in this position.
 
 The name of the sequence also contains important information. In
 In this case, the Illumina data provide the following information:
 
 ~~~ {.output}
-@<instrumento>:<corrida>:<identificador de celda de flujo>:<línea>:<cuadro>:<x-coord>:<y-coord> <lectura>:<si fue filtrada>:<número de control>:<índice de la secuencia> length=<tamaño de la secuencia>
+@<instrument>:<run>:<flow cell identifier>:<lane>:<square>:<x-coord>:<y-coord> <read>:<if the ead was filtered>:<control number>:<sequence index> length=<sequence size>
 ~~~
 
 The level of quality represented in the fourth line is called Phred score. In its
@@ -134,7 +139,7 @@ error:
 Phred score = - 10 * log10(error probability)
 ~~~
 
-| Puntaje de calidad (quality score) | Probabilidad de error |
+| Quality score | Error probability |
 |:----------------------|:----------------------|
 | Q40 0.0001 | (1 en 10,000) |
 | Q30 0.001 | (1 en 1,000) |
@@ -186,16 +191,31 @@ $ mkdir QUAL
 And we perform our quality analysis using FastQC:
 
 ~~~ {.bash}
-$ fastqc -O ./QUAL/ Partial_SRR2467141.fastq 
+$ fastqc -O ./QUAL/ lane1/s-7-1.fastq
 ~~~
 
 ~~~ {.output}
-Started analysis of Partial_SRR2467141.fastq
-Approx 20% complete for Partial_SRR2467141.fastq
-Approx 40% complete for Partial_SRR2467141.fastq
-Approx 60% complete for Partial_SRR2467141.fastq
-Approx 80% complete for Partial_SRR2467141.fastq
-Analysis complete for Partial_SRR2467141.fastq
+Started analysis of s-7-1.fastq
+Approx 5% complete for s-7-1.fastq
+Approx 10% complete for s-7-1.fastq
+Approx 15% complete for s-7-1.fastq
+Approx 20% complete for s-7-1.fastq
+Approx 25% complete for s-7-1.fastq
+Approx 30% complete for s-7-1.fastq
+Approx 35% complete for s-7-1.fastq
+Approx 40% complete for s-7-1.fastq
+Approx 45% complete for s-7-1.fastq
+Approx 50% complete for s-7-1.fastq
+Approx 55% complete for s-7-1.fastq
+Approx 60% complete for s-7-1.fastq
+Approx 65% complete for s-7-1.fastq
+Approx 70% complete for s-7-1.fastq
+Approx 75% complete for s-7-1.fastq
+Approx 80% complete for s-7-1.fastq
+Approx 85% complete for s-7-1.fastq
+Approx 90% complete for s-7-1.fastq
+Approx 95% complete for s-7-1.fastq
+Analysis complete for s-7-1.fastq
 ~~~ 
 
 Once finished, let's review the result:
@@ -204,166 +224,155 @@ Once finished, let's review the result:
 $ cd QUAL
 $ ls
 ~~~
+
 ~~~ {.output}
-Partial_SRR2467141_fastqc.html 
-Partial_SRR2467141_fastqc.zip
+s-7-1_fastqc.html  s-7-1_fastqc.zip
 ~~~
 
 The easiest way to explore these results is by opening the html file in
 your browser. You can do it by double clicking on the file.
 
-El resultado obtenido deberá ser similar a [este](http://liz-fernandez.github.io/transcriptome_analysis/Partial_SRR2467141_fastqc.html).
+The results should be similar to [this](http://liz-fernandez.github.io/DATA/s-7-1_fastqc.html).
 
 This page contains a lot of information broken down into the following sections:
 
-1. **Basic Statistics** - Las estadística básicas del experimento.
-2. **Per base sequence quality** - Diagramas de caja mostrando la calidad de cada base.
-3. **Per tile sequence quality** - Contiene el cuadro (tile) del que proviene cada secuencia. Solo aparece si los analísis se realizan en una librería de Illumina que retiene sus identificadores originales.
-4. **Per sequence quality scores** - Permite ver si un subgrupo de secuencias tiene mala calidad.
-5. **Per base sequence content** - Muestra la proporción de cada base en cada posición. 
-6. **Per sequence GC content** - Compara la distribución de GC observada con un distribución modelada de GC.
-7. **Per base N content** - Indica cuantos nucléotidos no pudieron ser interpretados y se indican con una N.
-8. **Sequence Length Distribution** - Muestra la distribución de la longitud de secuencias.
-9. **Sequence Duplication Levels** - Indica cuantas veces se repite cada secuencia. Se realiza solo en las primeras 100,000 secuencias.
-10. **Overrepresented sequences** - Muestra secuencias sobre representadas.
-11. **Adapter Content** - Muestra el contenido de adaptadores en la librería.
-12. **Kmer Content** - Muestra la distribución de kmers (subcadenas de tamaño específico) en cada posición de las lecturas. Solo se realiza en el 2% de la librería.
+1. **Basic Statistics** -  The basic statistics of the experiment.
+2. **Per base sequence quality** - Box diagrams showing the quality of each base.
+3. **Per tile sequence quality** - It contains the box (tile) from which each sequence comes. It only appears if the analyzes are made in an Illumina library that retains its original identifiers.
+4. **Per sequence quality scores** - It allows to see if a subgroup of sequences has bad quality.
+5. **Per base sequence content** - Shows the proportion of each base in each position. 
+6. **Per sequence GC content** - Compares the observed GC distribution with a modeled GC distribution.
+7. **Per base N content** - Indicates how many nucleotides could not be interpreted and are indicated with an N.
+8. **Sequence Length Distribution** - Shows the sequence length distribution.
+9. **Sequence Duplication Levels** - Indicate how many times each sequence is repeated. It is done only in the first 100,000 sequences.
+10. **Overrepresented sequences** - Shows over represented sequences.
+11. **Adapter Content** - Shows the content of adapters in the library.
 
-Revisemos los resultados una vez más dando click en el [link](http://liz-fernandez.github.io/transcriptome_analysis/Partial_SRR2467141_fastqc.html). 
+Let's review the results once more by clicking on the [link](http://liz-fernandez.github.io/DATA/s-7-1_fastqc.html). 
 
-En general vemos que la mayoría de los criterios tienen una palomita verde o certificado 
-de pase de control de calidad, con la excepción de el contenido de GC por base.
+In general we see that most of the criteria have a green tick of quality control pass, with the exception of 
+per base sequence content, GC content per base and overrepresented sequences.
 
-A pesar de que no proporcionamos esta información, el programa ha inferido la codificación 
-ASCII (Sanger / Illumina 1.9) así como contado el número de secuencias, su tamaño y 
-su contenido de GC. 
+Although we did not provide this information, the program has inferred the coding
+ASCII (Sanger / Illumina 1.9) as well as the number of sequences, their size and
+its GC content.
 
-Cuando observamos la **calidad por base**, vemos que la mayoría de las bases están en la zona 
-verde o tienen buena calidad. Cada base esta representada por un diagrama de caja que 
-proporciona una buena idea acerca de la distribución de los puntajes de calidad en todas
-las secuencias. Es evidente que la calidad decrece levemente al inicio y más marcadamente
-al final de la secuencia. Esto es conocido ya que pequeños errores se acumulan mientras 
-más larga sea la secuencia, esta es una de las razones por la que los secuenciadores basados
-en incorporación de nucleótidos tienen un límite en la longitud máxima de sus lecturas. 
+When we observe the **quality per base**, we see that most of the bases are in the area
+green or have good quality. Each base is represented by a box diagram that
+provides a good idea about the distribution of quality scores in all
+the sequences. It is evident that the quality decreases more markedly
+at the end of the sequence. This is known as small errors accumulate while
+the longer the sequence, this is one of the reasons why sequencers based
+in nucleotide incorporation they have a limit on the maximum length of their readings.
 
-La gráfica mostrando la **calidad por cuadro** esta completamente azul mostrando que la distribución promedio de errores en el cuadro (tile) es muy similar.
+The graph showing the **quality per tile** is almost completely blue showing that the average distribution of errors in the tile is very similar.
 
-La gráfica de **puntaje de calidad por secuencia** muestra que la mayoría de las secuencias tienen puntajes altos.
+The graph of **quality score per sequence** shows that most of the sequences have high scores.
 
-Si embargo, la **distribución de nucleótidos por base** muestra que, al principio de la secuencia, la distribución es muy disparatada. Esto es uno de los errores comunes en RNA-Seq hecho por Illumina. Generalmente se soluciona cortando algunos de los nucleótidos en el 5'.
+However, the **distribution of nucleotides per base** shows that, at the beginning of the sequence, the distribution is very disparate. 
 
-También observamos que: 
+We also observe that:
 
-* La **distribución de GC por secuencia** es muy similar a la distribución hipotética. 
-* Hay pocas **bases ambiguas (Ns)** .
-* Todas las secuencias tienen el mismo **tamaño**.  
-* Los niveles de **duplicación de secuencias** son bajos.
-* No hay **secuencias sobre representadas**.
-* Hay pocos **adaptadores**.
-* No hay **kmers** sobre representados.
+* The **GC distribution per sequence** is somewhat different to the hypothetical distribution.
+* There are few **ambiguous bases (Ns)**.
+* All sequences have the same **size**.
+* Levels of **duplication of sequences** are very low.
+* There are a few **over represented sequences**. Mostly Illumina PCR primers.
+* There are no **adapters**.
 
-Al ejecutar FastQC también se generó un archivo comprimido llamado 
-`Partial_SRR2467141_fastqc.zip`. 
-Desempacamos este archivo usando el comando:
+When running FastQC, a compressed file called
+`s-7-1_fastqc.zip`. 
+
+We unpack this file using the following command:
 
 ~~~ {.bash}
-$ unzip Partial_SRR2467141_fastqc.zip
+$ unzip s-7-1_fastqc.zip
 ~~~
+
 ~~~ {.output}
-Archive:  Partial_SRR2467141_fastqc.zip
-   creating: Partial_SRR2467141_fastqc/
-   creating: Partial_SRR2467141_fastqc/Icons/
-   creating: Partial_SRR2467141_fastqc/Images/
-  inflating: Partial_SRR2467141_fastqc/Icons/fastqc_icon.png
-  inflating: Partial_SRR2467141_fastqc/Icons/warning.png
-  inflating: Partial_SRR2467141_fastqc/Icons/error.png
-  inflating: Partial_SRR2467141_fastqc/Icons/tick.png
-  inflating: Partial_SRR2467141_fastqc/summary.txt
-  inflating: Partial_SRR2467141_fastqc/Images/per_base_quality.png
-  inflating: Partial_SRR2467141_fastqc/Images/per_tile_quality.png
-  inflating: Partial_SRR2467141_fastqc/Images/per_sequence_quality.png
-  inflating: Partial_SRR2467141_fastqc/Images/per_base_sequence_content.png
-  inflating: Partial_SRR2467141_fastqc/Images/per_sequence_gc_content.png
-  inflating: Partial_SRR2467141_fastqc/Images/per_base_n_content.png
-  inflating: Partial_SRR2467141_fastqc/Images/sequence_length_distribution.png
-  inflating: Partial_SRR2467141_fastqc/Images/duplication_levels.png
-  inflating: Partial_SRR2467141_fastqc/Images/adapter_content.png
-  inflating: Partial_SRR2467141_fastqc/fastqc_report.html
-  inflating: Partial_SRR2467141_fastqc/fastqc_data.txt
-  inflating: Partial_SRR2467141_fastqc/fastqc.fo
+Archive:  s-7-1_fastqc.zip
+   creating: s-7-1_fastqc/
+   creating: s-7-1_fastqc/Icons/
+   creating: s-7-1_fastqc/Images/
+  inflating: s-7-1_fastqc/Icons/fastqc_icon.png
+  inflating: s-7-1_fastqc/Icons/warning.png
+  inflating: s-7-1_fastqc/Icons/error.png
+  inflating: s-7-1_fastqc/Icons/tick.png
+  inflating: s-7-1_fastqc/summary.txt
+  inflating: s-7-1_fastqc/Images/per_base_quality.png
+  inflating: s-7-1_fastqc/Images/per_tile_quality.png
+  inflating: s-7-1_fastqc/Images/per_sequence_quality.png
+  inflating: s-7-1_fastqc/Images/per_base_sequence_content.png
+  inflating: s-7-1_fastqc/Images/per_sequence_gc_content.png
+  inflating: s-7-1_fastqc/Images/per_base_n_content.png
+  inflating: s-7-1_fastqc/Images/sequence_length_distribution.png
+  inflating: s-7-1_fastqc/Images/duplication_levels.png
+  inflating: s-7-1_fastqc/Images/adapter_content.png
+  inflating: s-7-1_fastqc/fastqc_report.html
+  inflating: s-7-1_fastqc/fastqc_data.txt
+  inflating: s-7-1_fastqc/fastqc.fo
 ~~~
 
-Si entramos a el directorio creado, podemos ver el reporte en formato de texto plano, 
-tanto el resumen:
+If we enter the newly created directory, we can see the report in plain text format,
+both the summary:
 
 ~~~ {.bash}
-$ cd Partial_SRR2467141_fastqc
+$ cd s-7-1_fastqc
 $ more summary.txt
 ~~~
+
 ~~~ {.output}
-PASS    Basic Statistics        Partial_SRR2467141.fastq
-PASS    Per base sequence quality       Partial_SRR2467141.fastq
-PASS    Per tile sequence quality       Partial_SRR2467141.fastq
-PASS    Per sequence quality scores     Partial_SRR2467141.fastq
-FAIL    Per base sequence content       Partial_SRR2467141.fastq
-PASS    Per sequence GC content Partial_SRR2467141.fastq
-PASS    Per base N content      Partial_SRR2467141.fastq
-PASS    Sequence Length Distribution    Partial_SRR2467141.fastq
-PASS    Sequence Duplication Levels     Partial_SRR2467141.fastq
-PASS    Overrepresented sequences       Partial_SRR2467141.fastq
-PASS    Adapter Content Partial_SRR2467141.fastq
-PASS    Kmer Content    Partial_SRR2467141.fastq
+PASS	Basic Statistics	s-7-1.fastq
+PASS	Per base sequence quality	s-7-1.fastq
+PASS	Per tile sequence quality	s-7-1.fastq
+PASS	Per sequence quality scores	s-7-1.fastq
+WARN	Per base sequence content	s-7-1.fastq
+WARN	Per sequence GC content	s-7-1.fastq
+PASS	Per base N content	s-7-1.fastq
+PASS	Sequence Length Distribution	s-7-1.fastq
+PASS	Sequence Duplication Levels	s-7-1.fastq
+WARN	Overrepresented sequences	s-7-1.fastq
+PASS	Adapter Content	s-7-1.fastq
 ~~~
 
-Como el archivo completo:
+and the full report file:
 
 ~~~ {.bash}
 $ more fastqc_data.txt
 ~~~
 
-Hemos omitido el contenido ya que es muy largo. 
-El poder revisar los resultados en archivos planos es extremadamente útil cuando los 
-resultados se encuentren en un servidor que no cuente tiene interface gráfica. 
+We have omitted the content since it is very long.
+Being able to review the results in flat files is extremely useful when
+results are in a server that does not have a graphical interface.
 
-Los programadores de FastQC han compilado ejemplos de datos de secuenciación de calidad
-diversa. Analisemoslos:
+FastQC programmers have compiled examples of quality sequencing data
+diverse Let's analyze them:
 
-* [Buenos datos - Illumina](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/good_sequence_short_fastqc.html)
-* [Malos datos - Illumina](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/bad_sequence_fastqc.html)
-* [Contaminación por dímeros](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/RNA-Seq_fastqc.html)
-* [RNAs pequeños con lecturas a través del adaptador](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/small_rna_fastqc.html)
-* [Datos PacBio](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/pacbio_srr075104_fastqc.html)
-* [Datos 454](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/454_SRR073599_fastqc.html)
+* [Good data - Illumina](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/good_sequence_short_fastqc.html)
+* [Bad data - Illumina](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/bad_sequence_fastqc.html)
+* [Dimer contamination](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/RNA-Seq_fastqc.html)
+* [Small RNAs with read through the adaptor ](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/small_rna_fastqc.html)
 
-> ## ¿Qué tan válido es nuestro análisis? {.challenge}
+> ## How valid is our analysis? {.challenge}
 >
-> Dado que los datos que descargamos solo tienen 5000 secuencias, ¿podemos 
-> confiar en que los datos completos tendrán calidad similar? ¿por qué si o por qué no?
+> Since the data we used only less than 200,000 sequences, can we
+> trust that the complete data will have similar quality? Why or why not?
 
-## Limpiando las secuencias
-
-Existen un número de herramientas para limpiar secuencias y distintos investigadores
-tienen distintas preferencias. Cómo con otros problemas de secuenciación existe un 
-desarrollo activo de programas con este fin.
-
-Examples of programs you can use in case your data is not great. 
-
-- Trimmomatic
-- 
-
-> ## ¿Qué diferencias hay entre las secuencias crudas y limpias? {.challenge}
+> ## How do the rest of the files look? {.challenge}
 >
-> Compara los archivos html entre las secuencias crudas y limpias. Resume:
-> ¿Qué diferencias existen?
-> ¿Cuál crees que sea la causa de esas diferencias?
-
-Existen otras herramientas como `fastx-toolkit`,`scythe` y `sickle` que realizan procesos similares. 
-Estás herramientas están en su versión de Biolinux si las quieren comparar.
-
-> ## Tarea - Análisis de calidad {.challenge}
+> Obtain the fastQC report html files for all other three fastq files.
 >
-> Realiza un análisis de calidad y corte por Trimmomatic de cada uno de los archivos 
-> fastq en el directorio que bajaron. 
+
+## Cleaning the sequences
+
+There are a number of tools to clean sequences and different researchers
+have different preferences. How with other sequencing problems there is a
+active development of programs for this purpose. When the data is of decent quality there is no need to carry out this step for variant annotation.
+
+Here are some examples of programs you can use in case your data is not great. 
+
+- [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
+- [cutadapt](https://cutadapt.readthedocs.io/)
 
 
 
