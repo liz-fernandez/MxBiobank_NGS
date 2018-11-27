@@ -23,9 +23,9 @@ $ pwd
 
 Characteristics of the experiment:
 
-Yeast genome: 12.5 Mbp; 16 chromosomes
-Whole genome sequencing
-Paired-end reads, 108bp, one library, 2 lanes
+* Yeast genome: 12.5 Mbp; 16 chromosomes
+* Whole genome sequencing
+* Paired-end reads, 108bp, one library, 2 lanes
 
 ## Mapping the reads to the genome
 

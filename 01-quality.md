@@ -57,7 +57,7 @@ s-7-1.fastq  s-7-2.fastq
 > For example, the Illumina files generally have the following format:
 >
 > ~~~ {.output}
-> <nombre de la muestra>_<secuencia identificadora (barcode)>_L<línea (3 dígitos)>_R<número de lectura (read)>_<número del set (3 dígitos)>.fastq.gz
+> <sample name>_<barcode>_L<lane(3 digits)>_R<read>_<set number (3 digits)>.fastq.gz
 > ~~~
 > Example: NA10831_ATCACG_L002_R1_001.fastq.gz
 >
